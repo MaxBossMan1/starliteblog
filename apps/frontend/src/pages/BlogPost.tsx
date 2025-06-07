@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import rehypeSanitize from 'rehype-sanitize';
+import rehypeHighlight from 'rehype-highlight';
+import 'highlight.js/styles/github.css';
 import Header from '../components/Shared/Header';
 import Footer from '../components/Shared/Footer';
 
@@ -116,23 +121,6 @@ const BlogPost: React.FC = () => {
       month: 'long',
       day: 'numeric',
     });
-  };
-
-  const renderMarkdown = (content: string) => {
-    // Basic markdown rendering (you might want to use a library like react-markdown)
-    return content
-      .replace(/^# (.*$)/gim, '<h1 class="text-3xl font-bold mb-4 text-violet-ltci">$1</h1>')
-      .replace(/^## (.*$)/gim, '<h2 class="text-2xl font-semibold mb-3 text-byzantium">$1</h2>')
-      .replace(/^### (.*$)/gim, '<h3 class="text-xl font-semibold mb-2 text-gray-800">$1</h3>')
-      .replace(/\*\*(.*)\*\*/gim, '<strong class="font-semibold">$1</strong>')
-      .replace(/\*(.*)\*/gim, '<em class="italic">$1</em>')
-      .replace(/```([\s\S]*?)```/gim, '<pre class="bg-gray-100 p-4 rounded-lg overflow-x-auto mb-4"><code>$1</code></pre>')
-      .replace(/`([^`]*)`/gim, '<code class="bg-gray-100 px-2 py-1 rounded text-sm">$1</code>')
-      .replace(/^\- (.*$)/gim, '<li class="mb-1">$1</li>')
-      .replace(/^\d+\. (.*$)/gim, '<li class="mb-1">$1</li>')
-      .replace(/\n\n/gim, '</p><p class="mb-4">')
-      .replace(/^(?!<[h|l|p|d])/gim, '<p class="mb-4">')
-      .replace(/\n/gim, '<br>');
   };
 
   if (loading) {
@@ -262,10 +250,78 @@ const BlogPost: React.FC = () => {
           </header>
 
           {/* Content */}
-          <div 
-            className="prose prose-lg max-w-none text-gray-800 leading-relaxed"
-            dangerouslySetInnerHTML={{ __html: renderMarkdown(post.content) }}
-          />
+          <div className="prose prose-lg max-w-none text-gray-800 leading-relaxed">
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              rehypePlugins={[rehypeSanitize, rehypeHighlight]}
+              components={{
+                h1: (props) => (
+                  <h1 className="text-3xl font-bold mb-4 text-violet-ltci">{props.children}</h1>
+                ),
+                h2: (props) => (
+                  <h2 className="text-2xl font-semibold mb-3 text-byzantium">{props.children}</h2>
+                ),
+                h3: (props) => (
+                  <h3 className="text-xl font-semibold mb-2 text-gray-800">{props.children}</h3>
+                ),
+                p: (props) => (
+                  <p className="mb-4">{props.children}</p>
+                ),
+                strong: (props) => (
+                  <strong className="font-semibold">{props.children}</strong>
+                ),
+                em: (props) => (
+                  <em className="italic">{props.children}</em>
+                ),
+                code: (props) => {
+                  const isInline = !props.className;
+                  if (isInline) {
+                    return (
+                      <code className="bg-gray-100 px-2 py-1 rounded text-sm">
+                        {props.children}
+                      </code>
+                    );
+                  }
+                  return (
+                    <code className={props.className}>
+                      {props.children}
+                    </code>
+                  );
+                },
+                pre: (props) => (
+                  <pre className="bg-gray-100 p-4 rounded-lg overflow-x-auto mb-4">
+                    {props.children}
+                  </pre>
+                ),
+                ul: (props) => (
+                  <ul className="mb-4 pl-6">{props.children}</ul>
+                ),
+                ol: (props) => (
+                  <ol className="mb-4 pl-6">{props.children}</ol>
+                ),
+                li: (props) => (
+                  <li className="mb-1">{props.children}</li>
+                ),
+                blockquote: (props) => (
+                  <blockquote className="border-l-4 border-violet-ltci pl-4 italic mb-4">
+                    {props.children}
+                  </blockquote>
+                ),
+                a: (props) => (
+                  <a 
+                    href={props.href} 
+                    className="text-violet-ltci hover:text-byzantium underline"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {props.children}
+                  </a>
+                ),
+              }}
+            >
+              {post.content}
+            </ReactMarkdown>
+          </div>
 
           {/* Share Buttons */}
           <div className="mt-12 pt-8 border-t border-gray-200">
