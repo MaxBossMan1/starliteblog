@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+
+/* Base styles */
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #F3F4F6;
+  margin: 0;
+  padding: 0;
+}
+
+/* Glass panel effect */
+@layer components {
+  .glass-panel {
+    @apply bg-white/60 backdrop-blur-md backdrop-saturate-150;
+    @apply border border-white/30 rounded-2xl shadow-glass;
+  }
+  
+  .hover-lift {
+    @apply transition-all duration-300 ease-in-out;
+  }
+  
+  .hover-lift:hover {
+    @apply transform -translate-y-1 shadow-hover-lift;
+  }
+  
+  .custom-shadow {
+    @apply shadow-custom;
+  }
+}
